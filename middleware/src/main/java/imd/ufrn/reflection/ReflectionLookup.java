@@ -5,6 +5,7 @@ import java.util.List;
 
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.errors.AnnotationNotPresent;
+import lombok.Getter;
 
 public class ReflectionLookup {
   private static ReflectionLookup instance;
@@ -16,8 +17,10 @@ public class ReflectionLookup {
     return ReflectionLookup.instance;
   };
 
+  @Getter
+  public RequestMapping mapping;
   public List<Class<?>> controllers;
-
+  
   private ReflectionLookup() {
     this.controllers = new LinkedList<>();
   };
