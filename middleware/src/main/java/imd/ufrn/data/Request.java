@@ -1,24 +1,29 @@
 package imd.ufrn.data;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import imd.ufrn.enums.Method;
 import imd.ufrn.utils.Serialization;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
-public abstract class Request implements Content {
+public class Request<T> implements Content {
+  public final Class<T> bodyClass;
   public String path;
   public String[] params;
   public Method method;
   public Headers headers;
+  public T body;
 
-  public abstract Object getBody();
+  public Request(Class<T> bodyClass) {
+    this.bodyClass = bodyClass;
+  };
 
   @Override
   public String serialize() throws JsonProcessingException {
@@ -47,6 +52,21 @@ public abstract class Request implements Content {
         body.getBytes(StandardCharsets.UTF_8).length,
         body
       ).replace("\n", "\r\n");
+    }
+  }
+
+  @Override
+  public Content mount(String body) throws IOException, JsonProcessingException {
+    Optional<T> _body = Serialization.deserialize(
+      body, 
+      this.bodyClass
+    );
+
+    if(_body.isPresent()) {
+      this.setBody(_body.get());
+      return this;
+    } else {
+      return this;
     }
   };
 };

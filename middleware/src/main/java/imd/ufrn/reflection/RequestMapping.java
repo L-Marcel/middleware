@@ -7,13 +7,12 @@ import java.util.Optional;
 
 import imd.ufrn.data.Headers;
 import imd.ufrn.data.Request;
+import imd.ufrn.data.Response;
 import imd.ufrn.enums.Method;
 import imd.ufrn.utils.Paths;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 public class RequestMapping {
-  private List<Mapping> list;
+  private List<RequestMappingEntry> list;
 
   public RequestMapping() {
     this.list = new LinkedList<>();
@@ -22,30 +21,37 @@ public class RequestMapping {
   public void register(
     Method method,
     String path,
-    Class<? extends Request> request
+    Class<Object> requestBodyClass,
+    Class<Request<Object>> request,
+    Class<Response<Object>> response
   ) {
     this.list.add(
-      new Mapping(
+      new RequestMappingEntry(
         method, 
-        path, 
-        request
+        path,
+        requestBodyClass,
+        request,
+        response
       )
     );
   };
 
-  public Optional<Request> findRequest(Method method, String path) {
+  public Optional<Request<Object>> findRequest(Method method, String path) {
     return this.list.stream()
-      .filter((request) -> request.getMethod().equals(method))
+      .filter((request) -> request.method().equals(method))
       .map((mapping) -> {
-        List<String> params = Paths.match(path, mapping.path);
+        List<String> params = Paths.match(path, mapping.path());
         if(params == null) return null;
-
+        
         try {
-          Constructor<? extends Request> constructor = mapping
-            .getRequest()
+          Constructor<Request<Object>> constructor = mapping
+            .request()
             .getDeclaredConstructor();
         
-          Request request = constructor.newInstance();
+          Request<Object> request = constructor.newInstance(
+            mapping.bodyClass()
+          );
+
           Headers headers = new Headers();
           request.setHeaders(headers);
           request.setMethod(method);
@@ -61,13 +67,5 @@ public class RequestMapping {
         }
       }).filter((_class) -> _class != null)
       .findFirst();
-  };
-
-  @AllArgsConstructor
-  @Getter
-  public class Mapping {
-    private Method method;
-    private String path;
-    private Class<? extends Request> request;
   };
 };

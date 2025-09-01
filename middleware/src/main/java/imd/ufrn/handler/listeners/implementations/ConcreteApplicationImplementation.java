@@ -42,7 +42,7 @@ public class ConcreteApplicationImplementation implements ApplicationImplementat
       String path = parts[1];
       
       Headers headers = new Headers();
-      Optional<Request> request = ReflectionLookup
+      Optional<Request<Object>> request = ReflectionLookup
         .getInstance()
         .getMapping()
         .findRequest(
