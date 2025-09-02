@@ -1,4 +1,4 @@
-package imd.ufrn.reflection;
+package imd.ufrn.lookup;
 
 import imd.ufrn.enums.HttpMethod;
 

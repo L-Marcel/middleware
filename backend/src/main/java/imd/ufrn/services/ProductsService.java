@@ -1,7 +1,6 @@
 package imd.ufrn.services;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import imd.ufrn.errors.ProductAlreadyExists;
 import imd.ufrn.errors.ProductNotFound;
@@ -28,7 +27,7 @@ public class ProductsService {
       .getProducts()
       .values()
       .stream()
-      .collect(Collectors.toList());
+      .toList();
   };
 
   public void register(

@@ -2,6 +2,7 @@ package imd.ufrn.data;
 
 import java.nio.charset.StandardCharsets;
 
+import imd.ufrn.data.errors.Error;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import imd.ufrn.utils.Serialization;
@@ -28,6 +29,10 @@ public class Response<T> {
 
   public static <T> Response<T> created() {
     return new Response<>(StatusCode.CREATED, null);
+  };
+
+  public static <T extends Error> Response<T> error(T error) {
+    return new Response<>(error.getCode(), error);
   };
 
   protected Response(StatusCode code) {

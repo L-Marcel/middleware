@@ -1,12 +1,10 @@
-package imd.ufrn.reflection;
+package imd.ufrn;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import imd.ufrn.annotations.DeleteMapping;
 import imd.ufrn.annotations.GetMapping;
@@ -18,6 +16,11 @@ import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.errors.AnnotationNotPresent;
+import imd.ufrn.lookup.Lookup;
+import imd.ufrn.lookup.LookupEntry;
+import imd.ufrn.lookup.LookupEntryBody;
+import imd.ufrn.lookup.LookupEntryParam;
+import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 public class Reflection {
@@ -55,17 +58,17 @@ public class Reflection {
       
       System.out.println("Registering controler: " + annotation.value());
       for(Method method : controller.getMethods()) {
-        this.mapMethod(annotation.value(), method);
+        this.mapRemotes(annotation.value(), method);
       };
     };
   };
 
-  public void mapMethod(String root, Method method) {
+  public void mapRemotes(String root, Method remote) {
     for(Class<? extends Annotation> annotation : annotations) {
-      if(method.isAnnotationPresent(annotation)) {
+      if(remote.isAnnotationPresent(annotation)) {
         try {
           String path = root + "/" + this.extractMethodRequestPath(
-            method, 
+            remote, 
             annotation
           );
 
@@ -73,24 +76,36 @@ public class Reflection {
             .getAnnotation(MethodMapping.class)
             .value();
           
-          Map<String, Class<?>> params = new LinkedHashMap<>(); 
-          Class<?> body = null;
-          for(Parameter param : method.getParameters()) {
+          LookupKey key = new LookupKey(httpMethod, path);
+          LookupEntryBody body = new LookupEntryBody();
+          List<LookupEntryParam> params = new LinkedList<>(); 
+          
+          for(Parameter param : remote.getParameters()) {
             if(param.isAnnotationPresent(RequestBody.class)) {
-              body = param.getType();
+              body = new LookupEntryBody(param.getType());
             } else if(param.isAnnotationPresent(PathParam.class)) {
               String name = param.getAnnotation(PathParam.class).value();
 
-              params.put(
-                name, 
-                param.getType()
+              params.add(
+                new LookupEntryParam(
+                  name, 
+                  param.getType()
+                )
               );
             };
           };
 
-          System.out.println("Registering path: " + httpMethod + " " + path);
-          System.out.println("with " + params.size() + " params ");
-          if(body != null) System.out.println("and body " + body.toString());
+          Lookup
+            .getInstance()
+            .register(
+              new LookupEntry(
+                key,
+                body,
+                params,
+                remote
+              )
+            );
+
           break;
         } catch (Exception e) {
           e.printStackTrace();

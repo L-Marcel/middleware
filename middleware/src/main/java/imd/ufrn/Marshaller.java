@@ -5,7 +5,7 @@ import java.io.EOFException;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.Reader;
 import imd.ufrn.enums.HttpMethod;
-import imd.ufrn.reflection.LookupKey;
+import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 public class Marshaller {

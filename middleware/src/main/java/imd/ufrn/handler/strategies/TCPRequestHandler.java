@@ -6,12 +6,15 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Duration;
+import java.util.Optional;
+
 import imd.ufrn.Marshaller;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
 import imd.ufrn.enums.TransportProtocol;
-import imd.ufrn.reflection.Lookup;
-import imd.ufrn.reflection.LookupKey;
+import imd.ufrn.invoker.InvokerEntry;
+import imd.ufrn.lookup.Lookup;
+import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 @Getter
@@ -61,9 +64,11 @@ public class TCPRequestHandler extends RequestHandler {
             .getInstance()
             .identify(connection);
           
-          Lookup
+          Optional<InvokerEntry> entry = Lookup
             .getInstance()
-            .findRequest(key);
+            .findInvokerEntry(key);
+          
+          
           // try {
           //   Content content = this.getApplication().read( 
           //     connection

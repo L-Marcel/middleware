@@ -7,13 +7,14 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Optional;
 
 import imd.ufrn.Marshaller;
-import imd.ufrn.data.Content;
-import imd.ufrn.data.errors.Error;
 import imd.ufrn.data.packages.Packet;
 import imd.ufrn.enums.TransportProtocol;
-import imd.ufrn.reflection.LookupKey;
+import imd.ufrn.invoker.InvokerEntry;
+import imd.ufrn.lookup.Lookup;
+import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 @Getter
@@ -86,8 +87,13 @@ public class UDPRequestHandler extends RequestHandler {
     return () -> {
       try {
         LookupKey key = Marshaller
+            .getInstance()
+            .identify(packet.content());
+          
+        Optional<InvokerEntry> entry = Lookup
           .getInstance()
-          .identify(packet.content());
+          .findInvokerEntry(key);
+        
         // Content content = this.getApplication().read(
         //   packet.content()
         // );
