@@ -1,42 +1,30 @@
 package imd.ufrn.handler;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import imd.ufrn.DawnSettings;
-import imd.ufrn.data.Content;
-import imd.ufrn.data.Request;
-import imd.ufrn.data.Response;
-import imd.ufrn.data.connection.Connection;
-import imd.ufrn.handler.listeners.ServerListener;
-import imd.ufrn.handler.listeners.TCPListener;
-import imd.ufrn.handler.listeners.UDPListener;
-import imd.ufrn.handler.listeners.implementations.ConcreteApplicationImplementation;
+import imd.ufrn.handler.listeners.RequestHandler;
+import imd.ufrn.handler.listeners.TCPRequestHandler;
+import imd.ufrn.handler.listeners.UDPRequestHandler;
 import lombok.Getter;
 
 @Getter
 public class ServerRequestHandler extends VirtualThread {
-  protected ServerListener listener;
+  protected RequestHandler handler;
   protected ExecutorService executor;
 
   public ServerRequestHandler(DawnSettings settings) {
     switch (settings.transport()) {
       case UDP:
-        this.listener = new UDPListener();
+        this.handler = new UDPRequestHandler();
         break;
       case TCP:
       default:
-        this.listener = new TCPListener();
+        this.handler = new TCPRequestHandler();
         break;
     };
-
-    this.listener.setApplication(
-      new ConcreteApplicationImplementation()
-    );
-
-    this.listener.setProcess(this::process);
 
     this.startup(
       settings.port(), 
@@ -48,25 +36,13 @@ public class ServerRequestHandler extends VirtualThread {
       this.executor = Executors.newVirtualThreadPerTaskExecutor();
   };
   
-  public Optional<Content> process(
-    Content content,
-    Optional<Connection> connection
-  ) {
-    if(content instanceof Request) {
-      // TODO - fazer algo com o request
-      return Optional.empty();
-    };
-
-    return Optional.empty();
-  };
-
   private void startup(
     int port,
     int backlog, 
     Duration timeout
   ) {
     try {
-      listener.bind(
+      this.handler.bind(
         port,
         backlog,
         timeout
@@ -74,7 +50,7 @@ public class ServerRequestHandler extends VirtualThread {
     
       System.out.println(
         "[Server] Servidor " + 
-        this.listener.getTransportProtocol() + 
+        this.handler.getTransportProtocol() + 
         " escutando na porta " + port
       );
     } catch (Exception e) {
@@ -86,7 +62,7 @@ public class ServerRequestHandler extends VirtualThread {
   public void run() {
     while (true) {
       try {
-        Runnable task = this.listener.accept();
+        Runnable task = this.handler.accept();
         if(this.executor == null) task.run();
         else this.executor.submit(task);
       } catch (Exception e) {

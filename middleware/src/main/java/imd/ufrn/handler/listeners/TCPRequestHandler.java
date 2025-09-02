@@ -13,21 +13,18 @@ import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
 import imd.ufrn.enums.ApplicationProtocol;
 import imd.ufrn.enums.TransportProtocol;
+import imd.ufrn.handler.listeners.implementations.Marshaller;
+import imd.ufrn.reflection.LookupKey;
 import lombok.Getter;
 
 @Getter
-public class TCPListener extends ServerListener {
+public class TCPRequestHandler extends RequestHandler {
   private ServerSocket socket;
   private Duration timeout;
 
   @Override
   public TransportProtocol getTransportProtocol() {
     return TransportProtocol.TCP;
-  };
-
-  @Override
-  public ApplicationProtocol getApplicationProtocol() {
-    return this.getApplication().getProtocol();
   };
 
   @Override
@@ -63,31 +60,34 @@ public class TCPListener extends ServerListener {
     return () -> {
       try {
         do {
-          try {
-            Content content = this.getApplication().read( 
-              connection
-            );
+          LookupKey key = Marshaller
+            .getInstance()
+            .identify(connection);
+          // try {
+          //   Content content = this.getApplication().read( 
+          //     connection
+          //   );
 
-            if(content instanceof Error) {
-              connection.getWriter().send(
-                content.serialize()
-              );
-            } else {
-              Optional<Content> response = this.getProcess().run(
-                content,
-                Optional.of(connection)
-              );
+          //   if(content instanceof Error) {
+          //     connection.getWriter().send(
+          //       content.serialize()
+          //     );
+          //   } else {
+          //     Optional<Content> response = this.getProcess().run(
+          //       content,
+          //       Optional.of(connection)
+          //     );
 
-              if(response.isPresent())
-                connection.getWriter().send(
-                  response.get().serialize()
-                );
-            };
+          //     if(response.isPresent())
+          //       connection.getWriter().send(
+          //         response.get().serialize()
+          //       );
+          //   };
 
-          } catch (Exception e) {
-            if(!connection.isClosed())
-              connection.close();
-          };
+          // } catch (Exception e) {
+          //   if(!connection.isClosed())
+          //     connection.close();
+          // };
         } while (!connection.isClosed());
       } catch (Exception e) {};
     };

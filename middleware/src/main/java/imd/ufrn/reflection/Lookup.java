@@ -7,13 +7,15 @@ import java.util.Optional;
 
 import imd.ufrn.data.Headers;
 import imd.ufrn.data.Request;
-import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.utils.Paths;
+import lombok.Getter;
 
 public class Lookup {
+  @Getter
+  private static final Lookup instance = new Lookup();
   private List<LookupEntry> list;
 
-  public Lookup() {
+  private Lookup() {
     this.list = new LinkedList<>();
   };
 
@@ -23,11 +25,18 @@ public class Lookup {
     this.list.add(entry);
   };
 
-  public Optional<Request<Object>> findRequest(HttpMethod method, String path) {
+  public Optional<Request<Object>> findRequest(LookupKey key) {
     return this.list.stream()
-      .filter((request) -> request.method().equals(method))
-      .map((mapping) -> {
-        List<String> params = Paths.match(path, mapping.path());
+      .filter((request) -> request.key()
+        .method()
+        .equals(key.method())
+      ).map((mapping) -> {
+        // TODO - Mapear corretamente
+        List<String> params = Paths.match(
+          key.path(), 
+          mapping.key().path()
+        );
+
         if(params == null) return null;
         
         try {
@@ -41,8 +50,8 @@ public class Lookup {
 
           Headers headers = new Headers();
           request.setHeaders(headers);
-          request.setMethod(method);
-          request.setPath(path);
+          request.setMethod(key.method());
+          request.setPath(key.path());
           request.setParams(
             params.stream()
               .toArray(String[]::new)

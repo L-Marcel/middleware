@@ -21,24 +21,16 @@ import imd.ufrn.errors.AnnotationNotPresent;
 import lombok.Getter;
 
 public class Reflection {
-  private static Reflection instance;
-  public static Reflection getInstance() {
-    if(Reflection.instance == null) {
-      Reflection.instance = new Reflection();
-    };
-
-    return Reflection.instance;
-  };
-
   @Getter
-  private Lookup lookup;
-  private List<Class<?>> controllers;
+  private static final Reflection instance = new Reflection();
   private static final List<Class<? extends Annotation>> annotations = List.of(
     GetMapping.class,
     PostMapping.class,
     PutMapping.class,
     DeleteMapping.class
   );
+
+  private List<Class<?>> controllers;
   
   private Reflection() {
     this.controllers = new LinkedList<>();
@@ -57,8 +49,6 @@ public class Reflection {
   };
 
   public void map() {
-    this.lookup = new Lookup();
-
     for(Class<?> controller : this.controllers) {
       RestController annotation = controller
         .getAnnotation(RestController.class);

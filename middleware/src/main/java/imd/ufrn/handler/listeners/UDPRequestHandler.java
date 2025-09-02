@@ -7,27 +7,22 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Optional;
 
 import imd.ufrn.data.Content;
 import imd.ufrn.data.errors.Error;
 import imd.ufrn.data.packages.Packet;
-import imd.ufrn.enums.ApplicationProtocol;
 import imd.ufrn.enums.TransportProtocol;
+import imd.ufrn.handler.listeners.implementations.Marshaller;
+import imd.ufrn.reflection.LookupKey;
 import lombok.Getter;
 
 @Getter
-public class UDPListener extends ServerListener {
+public class UDPRequestHandler extends RequestHandler {
   private DatagramSocket socket;
 
   @Override
   public TransportProtocol getTransportProtocol() {
-    return TransportProtocol.UDP;
-  };
-
-  @Override
-  public ApplicationProtocol getApplicationProtocol() {
-    return this.getApplication().getProtocol();
+    return TransportProtocol.TCP;
   };
 
   @Override
@@ -90,27 +85,30 @@ public class UDPListener extends ServerListener {
 
     return () -> {
       try {
-        Content content = this.getApplication().read(
-          packet.content()
-        );
+        LookupKey key = Marshaller
+          .getInstance()
+          .identify(packet.content());
+        // Content content = this.getApplication().read(
+        //   packet.content()
+        // );
 
-        if(content instanceof Error) {
-          this.send(new Packet(
-            packet.address(),
-            content.serialize()
-          ));
-        } else {
-          Optional<Content> response = this.getProcess().run(
-            content,
-            Optional.empty()
-          );
+        // if(content instanceof Error) {
+        //   this.send(new Packet(
+        //     packet.address(),
+        //     content.serialize()
+        //   ));
+        // } else {
+          // Optional<Content> response = this.getProcess().run(
+          //   content,
+          //   Optional.empty()
+          // );
 
-          if(response.isPresent())
-            this.send(new Packet(
-              packet.address(),
-              response.get().serialize()
-            ));
-        };
+          // if(response.isPresent())
+          //   this.send(new Packet(
+          //     packet.address(),
+          //     response.get().serialize()
+          //   ));
+        // };
       } catch (Exception e) {};
     };
   };
