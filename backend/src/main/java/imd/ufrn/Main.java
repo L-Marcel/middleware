@@ -6,5 +6,6 @@ public class Main {
   public static void main(String[] args) {
     Dawn dawn = new Dawn();
     dawn.addController(ProductsController.class);
+    dawn.start();
   };
 };

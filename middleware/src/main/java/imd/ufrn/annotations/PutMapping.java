@@ -4,9 +4,11 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import imd.ufrn.enums.HttpMethod;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@MethodMapping(HttpMethod.PUT)
 public @interface PutMapping {
-  public String value() default "/";
+  public String value() default "";
 };

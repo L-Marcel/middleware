@@ -1,11 +1,17 @@
 package imd.ufrn;
 
-import imd.ufrn.reflection.ReflectionLookup;
+import imd.ufrn.reflection.Reflection;
 
 public class Dawn {
   public void addController(Class<?> controller) {
-    ReflectionLookup
+    Reflection
       .getInstance()
       .add(controller);
+  };
+
+  public void start() {
+    Reflection
+      .getInstance()
+      .map();
   };
 };

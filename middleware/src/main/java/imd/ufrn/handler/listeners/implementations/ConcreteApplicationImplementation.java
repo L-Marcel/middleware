@@ -12,8 +12,8 @@ import imd.ufrn.data.connection.Reader;
 import imd.ufrn.data.errors.BadRequest;
 import imd.ufrn.data.errors.InternalServerError;
 import imd.ufrn.enums.ApplicationProtocol;
-import imd.ufrn.enums.Method;
-import imd.ufrn.reflection.ReflectionLookup;
+import imd.ufrn.enums.HttpMethod;
+import imd.ufrn.reflection.Reflection;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -42,11 +42,11 @@ public class ConcreteApplicationImplementation implements ApplicationImplementat
       String path = parts[1];
       
       Headers headers = new Headers();
-      Optional<Request<Object>> request = ReflectionLookup
+      Optional<Request<Object>> request = Reflection
         .getInstance()
-        .getMapping()
+        .getLookup()
         .findRequest(
-          Method.valueOf(method),
+          HttpMethod.valueOf(method),
           path
         );
 

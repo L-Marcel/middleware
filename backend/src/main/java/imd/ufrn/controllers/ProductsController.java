@@ -4,8 +4,8 @@ import java.util.List;
 
 import imd.ufrn.annotations.DeleteMapping;
 import imd.ufrn.annotations.GetMapping;
+import imd.ufrn.annotations.PathParam;
 import imd.ufrn.annotations.PostMapping;
-import imd.ufrn.annotations.QueryParam;
 import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.data.Response;
@@ -28,7 +28,7 @@ public class ProductsController {
 
   @GetMapping("{id}")
   public Response<Product> findById(
-    @QueryParam Integer id
+    @PathParam("id") Integer id
   ) {
     Product product = this.service.findById(id);
     return Response.ok(product);
@@ -44,7 +44,7 @@ public class ProductsController {
 
   @PostMapping("{id}/buy")
   public Response<Void> buyById(
-    @QueryParam Integer id,
+    @PathParam("id") Integer id,
     @RequestBody Amount amount
   ) {
     this.service.buy(id, amount.value());
@@ -53,7 +53,7 @@ public class ProductsController {
 
   @PostMapping("{id}/sell")
   public Response<Void> sellById(
-    @QueryParam Integer id,
+    @PathParam("id") Integer id,
     @RequestBody Amount amount
   ) {
     this.service.sell(id, amount.value());
@@ -62,7 +62,7 @@ public class ProductsController {
 
   @DeleteMapping("{id}")
   public Response<Void> deleteById(
-    @QueryParam Integer id
+    @PathParam("id") Integer id
   ) {
     this.service.delete(id);
     return Response.ok();

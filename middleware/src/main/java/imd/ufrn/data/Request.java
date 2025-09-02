@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import imd.ufrn.enums.Method;
+import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.utils.Serialization;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public class Request<T> implements Content {
   public final Class<T> bodyClass;
   public String path;
   public String[] params;
-  public Method method;
+  public HttpMethod method;
   public Headers headers;
   public T body;
 

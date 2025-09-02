@@ -4,11 +4,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import imd.ufrn.enums.HttpMethod;
 
-@Target(ElementType.METHOD)
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-@MethodMapping(HttpMethod.DELETE)
-public @interface DeleteMapping {
-  public String value() default "";
+public @interface PathParam {
+  public String value();
+  public boolean required() default false;
 };

@@ -7,36 +7,23 @@ import java.util.Optional;
 
 import imd.ufrn.data.Headers;
 import imd.ufrn.data.Request;
-import imd.ufrn.data.Response;
-import imd.ufrn.enums.Method;
+import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.utils.Paths;
 
-public class RequestMapping {
-  private List<RequestMappingEntry> list;
+public class Lookup {
+  private List<LookupEntry> list;
 
-  public RequestMapping() {
+  public Lookup() {
     this.list = new LinkedList<>();
   };
 
   public void register(
-    Method method,
-    String path,
-    Class<Object> requestBodyClass,
-    Class<Request<Object>> request,
-    Class<Response<Object>> response
+    LookupEntry entry
   ) {
-    this.list.add(
-      new RequestMappingEntry(
-        method, 
-        path,
-        requestBodyClass,
-        request,
-        response
-      )
-    );
+    this.list.add(entry);
   };
 
-  public Optional<Request<Object>> findRequest(Method method, String path) {
+  public Optional<Request<Object>> findRequest(HttpMethod method, String path) {
     return this.list.stream()
       .filter((request) -> request.method().equals(method))
       .map((mapping) -> {

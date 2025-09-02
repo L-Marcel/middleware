@@ -1,6 +1,6 @@
 package imd.ufrn.enums;
 
-public enum Method {
+public enum HttpMethod {
   POST,
   GET,
   DELETE,
