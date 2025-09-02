@@ -1,4 +1,4 @@
-package imd.ufrn.handler.listeners;
+package imd.ufrn.handler.strategies;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -6,14 +6,11 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Duration;
-import java.util.Optional;
-
-import imd.ufrn.data.Content;
+import imd.ufrn.Marshaller;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
-import imd.ufrn.enums.ApplicationProtocol;
 import imd.ufrn.enums.TransportProtocol;
-import imd.ufrn.handler.listeners.implementations.Marshaller;
+import imd.ufrn.reflection.Lookup;
 import imd.ufrn.reflection.LookupKey;
 import lombok.Getter;
 
@@ -63,6 +60,10 @@ public class TCPRequestHandler extends RequestHandler {
           LookupKey key = Marshaller
             .getInstance()
             .identify(connection);
+          
+          Lookup
+            .getInstance()
+            .findRequest(key);
           // try {
           //   Content content = this.getApplication().read( 
           //     connection

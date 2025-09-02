@@ -6,6 +6,6 @@ import imd.ufrn.data.Response;
 public record LookupEntry(
   LookupKey key,
   Class<Object> bodyClass,
-  Class<Request<Object>> request,
+  Class<Request> request,
   Class<Response<Object>> response
 ) {};

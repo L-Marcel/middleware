@@ -1,4 +1,4 @@
-package imd.ufrn.handler.listeners;
+package imd.ufrn.handler.strategies;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -8,11 +8,11 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+import imd.ufrn.Marshaller;
 import imd.ufrn.data.Content;
 import imd.ufrn.data.errors.Error;
 import imd.ufrn.data.packages.Packet;
 import imd.ufrn.enums.TransportProtocol;
-import imd.ufrn.handler.listeners.implementations.Marshaller;
 import imd.ufrn.reflection.LookupKey;
 import lombok.Getter;
 

@@ -25,7 +25,7 @@ public class Lookup {
     this.list.add(entry);
   };
 
-  public Optional<Request<Object>> findRequest(LookupKey key) {
+  public Optional<Request> findRequest(LookupKey key) {
     return this.list.stream()
       .filter((request) -> request.key()
         .method()
@@ -40,11 +40,11 @@ public class Lookup {
         if(params == null) return null;
         
         try {
-          Constructor<Request<Object>> constructor = mapping
+          Constructor<Request> constructor = mapping
             .request()
             .getDeclaredConstructor();
         
-          Request<Object> request = constructor.newInstance(
+          Request request = constructor.newInstance(
             mapping.bodyClass()
           );
 

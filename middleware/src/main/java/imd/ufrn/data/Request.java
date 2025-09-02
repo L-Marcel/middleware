@@ -13,15 +13,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Request<T> implements Content {
-  public final Class<T> bodyClass;
+public class Request implements Content {
+  public final Class<? extends Object> bodyClass;
+  public Object body;
   public String path;
   public String[] params;
   public HttpMethod method;
   public Headers headers;
-  public T body;
 
-  public Request(Class<T> bodyClass) {
+  public Request(Class<? extends Object> bodyClass) {
     this.bodyClass = bodyClass;
   };
 
@@ -53,11 +53,11 @@ public class Request<T> implements Content {
         body
       ).replace("\n", "\r\n");
     }
-  }
+  };
 
   @Override
   public Content mount(String body) throws IOException, JsonProcessingException {
-    Optional<T> _body = Serialization.deserialize(
+    Optional<?> _body = Serialization.deserialize(
       body, 
       this.bodyClass
     );

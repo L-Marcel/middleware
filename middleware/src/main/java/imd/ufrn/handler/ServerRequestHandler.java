@@ -5,16 +5,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import imd.ufrn.DawnSettings;
-import imd.ufrn.handler.listeners.RequestHandler;
-import imd.ufrn.handler.listeners.TCPRequestHandler;
-import imd.ufrn.handler.listeners.UDPRequestHandler;
+import imd.ufrn.handler.strategies.RequestHandler;
+import imd.ufrn.handler.strategies.TCPRequestHandler;
+import imd.ufrn.handler.strategies.UDPRequestHandler;
 import lombok.Getter;
 
 @Getter
 public class ServerRequestHandler extends VirtualThread {
   protected RequestHandler handler;
   protected ExecutorService executor;
-
+  
   public ServerRequestHandler(DawnSettings settings) {
     switch (settings.transport()) {
       case UDP:

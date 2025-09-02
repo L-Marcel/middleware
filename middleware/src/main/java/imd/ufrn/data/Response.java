@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Response<T> {
-  private Headers headers;
   private StatusCode code;
   private T body;
 

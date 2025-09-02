@@ -1,4 +1,4 @@
-package imd.ufrn.handler.listeners.implementations;
+package imd.ufrn;
 
 import java.io.EOFException;
 
