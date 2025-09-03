@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 public record InvokerEntry(
-  InvokerEntryBody body,
   List<InvokerEntryParam> params,
   Method remote
 ) {};

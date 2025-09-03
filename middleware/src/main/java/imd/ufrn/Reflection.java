@@ -18,7 +18,6 @@ import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.errors.AnnotationNotPresent;
 import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupEntry;
-import imd.ufrn.lookup.LookupEntryBody;
 import imd.ufrn.lookup.LookupEntryParam;
 import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
@@ -77,18 +76,24 @@ public class Reflection {
             .value();
           
           LookupKey key = new LookupKey(httpMethod, path);
-          LookupEntryBody body = new LookupEntryBody();
           List<LookupEntryParam> params = new LinkedList<>(); 
           
           for(Parameter param : remote.getParameters()) {
             if(param.isAnnotationPresent(RequestBody.class)) {
-              body = new LookupEntryBody(param.getType());
+              params.add(
+                new LookupEntryParam(
+                  null,
+                  true, 
+                  param.getType()
+                )
+              );
             } else if(param.isAnnotationPresent(PathParam.class)) {
               String name = param.getAnnotation(PathParam.class).value();
 
               params.add(
                 new LookupEntryParam(
-                  name, 
+                  name,
+                  false,
                   param.getType()
                 )
               );
@@ -100,7 +105,6 @@ public class Reflection {
             .register(
               new LookupEntry(
                 key,
-                body,
                 params,
                 remote
               )

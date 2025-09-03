@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.UUID;
 
+import imd.ufrn.data.Reader;
+import imd.ufrn.data.Writer;
 import imd.ufrn.enums.TransportProtocol;
 import lombok.Getter;
 

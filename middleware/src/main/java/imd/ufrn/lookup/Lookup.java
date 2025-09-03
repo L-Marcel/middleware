@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import imd.ufrn.invoker.InvokerEntry;
-import imd.ufrn.invoker.InvokerEntryBody;
 import imd.ufrn.invoker.InvokerEntryParam;
 
 import lombok.Getter;
@@ -43,9 +42,6 @@ public class Lookup {
           return null;
         
         return new InvokerEntry(
-          new InvokerEntryBody(
-            entry.body().type()
-          ),
           params,
           entry.remote()
         );
@@ -82,6 +78,7 @@ public class Lookup {
     return params.stream()
       .map((entry) -> new InvokerEntryParam(
         entry.id(),
+        entry.body(),
         entry.type(),
         values.getOrDefault(entry.id(), null)
       )).toList();

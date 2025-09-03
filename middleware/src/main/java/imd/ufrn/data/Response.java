@@ -11,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Response<T> {
+public class Response<T extends Object> {
   private StatusCode code;
   private T body;
 

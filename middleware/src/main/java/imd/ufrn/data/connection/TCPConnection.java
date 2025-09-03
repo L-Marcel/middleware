@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import imd.ufrn.data.Reader;
+import imd.ufrn.data.Writer;
 import imd.ufrn.enums.TransportProtocol;
 import lombok.Getter;
 
@@ -22,7 +24,7 @@ public class TCPConnection extends Connection {
       this
     );
 
-    this.reader = new Reader(
+    this.reader = new ConnectionReader(
       socket.getInputStream()
     );
   };

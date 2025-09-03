@@ -12,6 +12,7 @@ import imd.ufrn.Marshaller;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
 import imd.ufrn.enums.TransportProtocol;
+import imd.ufrn.invoker.Invoker;
 import imd.ufrn.invoker.InvokerEntry;
 import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupKey;
@@ -60,40 +61,44 @@ public class TCPRequestHandler extends RequestHandler {
     return () -> {
       try {
         do {
-          LookupKey key = Marshaller
-            .getInstance()
-            .identify(connection);
+          try {
+            LookupKey key = Marshaller
+              .getInstance()
+              .identify(connection.getReader());
           
-          Optional<InvokerEntry> entry = Lookup
-            .getInstance()
-            .findInvokerEntry(key);
-          
-          
-          // try {
-          //   Content content = this.getApplication().read( 
-          //     connection
-          //   );
+            Optional<InvokerEntry> entry = Lookup
+              .getInstance()
+              .findInvokerEntry(key);
 
-          //   if(content instanceof Error) {
-          //     connection.getWriter().send(
-          //       content.serialize()
-          //     );
-          //   } else {
-          //     Optional<Content> response = this.getProcess().run(
-          //       content,
-          //       Optional.of(connection)
-          //     );
+            if(entry.isPresent()) {
+              Invoker
+                .getInstance()
+                .invoke(
+                  connection.getReader(),
+                  entry.get()
+                );
+            };
 
-          //     if(response.isPresent())
-          //       connection.getWriter().send(
-          //         response.get().serialize()
-          //       );
-          //   };
+            // if(content instanceof Error) {
+            //   connection.getWriter().send(
+            //     content.serialize()
+            //   );
+            // } else {
+            //   Optional<Content> response = this.getProcess().run(
+            //     content,
+            //     Optional.of(connection)
+            //   );
 
-          // } catch (Exception e) {
-          //   if(!connection.isClosed())
-          //     connection.close();
-          // };
+            //   if(response.isPresent())
+            //     connection.getWriter().send(
+            //       response.get().serialize()
+            //     );
+            // };
+
+          } catch (Exception e) {
+            if(!connection.isClosed())
+              connection.close();
+          };
         } while (!connection.isClosed());
       } catch (Exception e) {};
     };

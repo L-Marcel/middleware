@@ -7,11 +7,15 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 
-public class Reader extends DataInputStream {
-  public Reader(InputStream input) {
+import imd.ufrn.data.Reader;
+
+public class ConnectionReader extends DataInputStream 
+implements Reader {
+  public ConnectionReader(InputStream input) {
     super(input);
   };
 
+  @Override
   public String readNextLine() throws IOException {
     try (ByteArrayBuilder builder = new ByteArrayBuilder()) {
       byte current = this.readByte();

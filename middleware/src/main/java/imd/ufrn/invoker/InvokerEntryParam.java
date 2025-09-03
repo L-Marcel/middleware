@@ -2,6 +2,7 @@ package imd.ufrn.invoker;
 
 public record InvokerEntryParam(
   String id,
-  Class<? extends Object> type,
+  boolean body,
+  Class<Object> type,
   String value
 ) {};

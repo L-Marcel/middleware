@@ -1,24 +1,22 @@
 package imd.ufrn;
 
 import java.io.EOFException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-import imd.ufrn.data.connection.Connection;
-import imd.ufrn.data.connection.Reader;
+import imd.ufrn.data.Reader;
 import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.lookup.LookupKey;
+import imd.ufrn.utils.Serialization;
 import lombok.Getter;
 
 public class Marshaller {
   @Getter
   private static final Marshaller instance = new Marshaller();
 
-  public LookupKey identify(String content) throws Exception {
-    // TODO - Implementar versão do UDP
-    throw new EOFException();
-  };
-
-  public LookupKey identify(Connection connection) throws Exception {
-    Reader reader = connection.getReader();
+  public LookupKey identify(
+    Reader reader
+  ) throws Exception {
     String content = reader.readNextLine();
 
     if(content.endsWith("HTTP/1.1")) {
@@ -32,40 +30,56 @@ public class Marshaller {
         HttpMethod.valueOf(method),
         path
       );
-      
-      // Headers headers = new Headers();
-      // Optional<Request<Object>> request = Lookup
-      //   .getInstance()
-      //   .findRequest(
-      //     HttpMethod.valueOf(method),
-      //     path
-      //   );
-
-      // content = reader.readNextLine();
-      // while(!content.trim().isEmpty()) {
-      //   String[] header = content.split(": ");
-
-      //   StringBuilder builder = new StringBuilder();
-      //   for(int i = 1; i < header.length; i++)
-      //     builder.append(header[i]);
-
-      //   headers.put(header[0], builder.toString());
-      //   content = reader.readNextLine();
-      // };
-
-      // try {
-      //   byte[] bytes = new byte[headers.getLength()];
-      //   reader.readFully(bytes);
-
-      //   content = new String(bytes, StandardCharsets.UTF_8);
-      //   if(request.isEmpty()) return new BadRequest();
-        
-      //   request.get().setHeaders(headers);
-      //   return request.get().mount(content);
-      // } catch (Exception e) {
-      //   e.printStackTrace();
-      //   return new BadRequest();
-      // }
     } else throw new EOFException();
+  };
+
+  public Object mount(
+    Reader reader, 
+    Class<Object> type
+  ) throws Exception {
+    String content = reader.readNextLine();
+      
+    int contentLength = 0;
+    while(!content.trim().isEmpty()) {
+      String[] header = content.split(": ");
+
+      StringBuilder builder = new StringBuilder();
+      for(int i = 1; i < header.length; i++)
+        builder.append(header[i]);
+
+      if("Content-Length".equals(header[0]))
+        contentLength = Integer.parseInt(builder.toString());
+      
+      content = reader.readNextLine();
+    };
+
+    try {
+      byte[] bytes = new byte[contentLength];
+      reader.readFully(bytes);
+
+      content = new String(bytes, StandardCharsets.UTF_8);
+      
+      return this.deserialize(
+        content,
+        type
+      );
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  };
+
+  public Object deserialize(
+    String content,
+    Class<Object> type
+  ) {
+    Optional<? extends Object> object = Serialization.deserialize(
+      content,
+      type
+    );
+    
+    if(object.isPresent()) 
+      return object.get();
+    else return null;
   };
 };
