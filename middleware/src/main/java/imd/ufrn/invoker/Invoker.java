@@ -1,10 +1,8 @@
 package imd.ufrn.invoker;
 
-import java.util.Optional;
-
 import imd.ufrn.Marshaller;
 import imd.ufrn.data.Response;
-import imd.ufrn.data.connection.Reader;
+import imd.ufrn.data.Reader;
 import lombok.Getter;
 
 public class Invoker {

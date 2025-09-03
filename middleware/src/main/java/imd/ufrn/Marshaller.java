@@ -35,7 +35,7 @@ public class Marshaller {
 
   public Object mount(
     Reader reader, 
-    Class<Object> type
+    Class<?> type
   ) throws Exception {
     String content = reader.readNextLine();
       
@@ -54,9 +54,7 @@ public class Marshaller {
     };
 
     try {
-      byte[] bytes = new byte[contentLength];
-      reader.readFully(bytes);
-
+      byte[] bytes = reader.readBytes(contentLength);
       content = new String(bytes, StandardCharsets.UTF_8);
       
       return this.deserialize(
@@ -71,7 +69,7 @@ public class Marshaller {
 
   public Object deserialize(
     String content,
-    Class<Object> type
+    Class<?> type
   ) {
     Optional<? extends Object> object = Serialization.deserialize(
       content,

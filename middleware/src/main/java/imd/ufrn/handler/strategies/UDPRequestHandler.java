@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import imd.ufrn.Marshaller;
 import imd.ufrn.data.packages.Packet;
+import imd.ufrn.data.packages.PacketReader;
 import imd.ufrn.enums.TransportProtocol;
 import imd.ufrn.invoker.InvokerEntry;
 import imd.ufrn.lookup.Lookup;
@@ -83,16 +84,18 @@ public class UDPRequestHandler extends RequestHandler {
   @Override
   public Runnable accept() throws IOException {
     Packet packet = this.receive();
+    PacketReader reader = new PacketReader(packet);
 
     return () -> {
       try {
         LookupKey key = Marshaller
             .getInstance()
-            .identify(packet.content());
+            .identify(reader);
           
         Optional<InvokerEntry> entry = Lookup
           .getInstance()
           .findInvokerEntry(key);
+        
         
         // Content content = this.getApplication().read(
         //   packet.content()

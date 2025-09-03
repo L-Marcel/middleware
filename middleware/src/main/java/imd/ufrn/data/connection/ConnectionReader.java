@@ -1,6 +1,7 @@
 package imd.ufrn.data.connection;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -37,5 +38,12 @@ implements Reader {
     } catch (Exception e) {
       throw e;
     }
+  };
+
+  @Override
+  public byte[] readBytes(int length) throws IOException, EOFException {
+    byte[] bytes = new byte[length];
+    this.readFully(bytes);
+    return bytes;
   };
 };

@@ -9,8 +9,12 @@ import java.time.Duration;
 import java.util.Optional;
 
 import imd.ufrn.Marshaller;
+import imd.ufrn.data.Reader;
+import imd.ufrn.data.Response;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
+import imd.ufrn.data.errors.Error;
+import imd.ufrn.data.errors.NotFound;
 import imd.ufrn.enums.TransportProtocol;
 import imd.ufrn.invoker.Invoker;
 import imd.ufrn.invoker.InvokerEntry;
@@ -57,6 +61,7 @@ public class TCPRequestHandler extends RequestHandler {
     client.setSoTimeout(timeout);
 
     Connection connection = new TCPConnection(client);
+    Reader reader = connection.getReader();
 
     return () -> {
       try {
@@ -64,37 +69,32 @@ public class TCPRequestHandler extends RequestHandler {
           try {
             LookupKey key = Marshaller
               .getInstance()
-              .identify(connection.getReader());
+              .identify(reader);
           
             Optional<InvokerEntry> entry = Lookup
               .getInstance()
               .findInvokerEntry(key);
 
             if(entry.isPresent()) {
-              Invoker
+              Response<Object> response = Invoker
                 .getInstance()
                 .invoke(
-                  connection.getReader(),
+                  reader,
                   entry.get()
                 );
+              
+              connection.getWriter().send(
+                response.serialize()
+              );
+            } else {
+              connection.getWriter().send(
+                new NotFound().toResponse().serialize()
+              );
             };
-
-            // if(content instanceof Error) {
-            //   connection.getWriter().send(
-            //     content.serialize()
-            //   );
-            // } else {
-            //   Optional<Content> response = this.getProcess().run(
-            //     content,
-            //     Optional.of(connection)
-            //   );
-
-            //   if(response.isPresent())
-            //     connection.getWriter().send(
-            //       response.get().serialize()
-            //     );
-            // };
-
+          } catch (Error error) {
+            connection.getWriter().send(
+              error.toResponse().serialize()
+            );
           } catch (Exception e) {
             if(!connection.isClosed())
               connection.close();
