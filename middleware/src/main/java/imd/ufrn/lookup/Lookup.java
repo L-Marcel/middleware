@@ -43,6 +43,7 @@ public class Lookup {
         
         return new InvokerEntry(
           params,
+          entry.instance(),
           entry.remote()
         );
       }).filter((_class) -> _class != null)
@@ -67,10 +68,10 @@ public class Lookup {
       String value = paths[i].trim();
       String id = expecteds[i].trim();
 
-      if(id.startsWith(":")) {
-        id = id.replace(":", "");
+      if(id.startsWith("{") & id.endsWith("}")) {
+        id = id.replace("{", "").replace("}", "");
         values.put(id, value);
-      } else if(!path.equals(expected)) {
+      } else if(!id.equals(value)) {
         return null;
       };
     };
@@ -80,6 +81,7 @@ public class Lookup {
         entry.id(),
         entry.body(),
         entry.type(),
+        entry.instance(),
         values.getOrDefault(entry.id(), null)
       )).toList();
   };

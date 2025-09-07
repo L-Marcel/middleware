@@ -1,6 +1,7 @@
 package imd.ufrn;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedList;
@@ -51,25 +52,35 @@ public class Reflection {
   };
 
   public void map() {
-    for(Class<?> controller : this.controllers) {
-      RestController annotation = controller
-        .getAnnotation(RestController.class);
-      
-      System.out.println("Registering controler: " + annotation.value());
-      for(Method method : controller.getMethods()) {
-        this.mapRemotes(annotation.value(), method);
+    try {
+      for(Class<?> controller : this.controllers) {
+        RestController annotation = controller
+          .getAnnotation(RestController.class);
+        Constructor<?> constructor = controller.getConstructor();
+        Object instance = constructor.newInstance();
+
+        System.out.println("Registering controler: " + annotation.value());
+        for(Method method : controller.getMethods()) {
+          this.mapRemotes(annotation.value(), method, instance);
+        };
       };
-    };
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   };
 
-  public void mapRemotes(String root, Method remote) {
+  public void mapRemotes(String root, Method remote, Object instance) {
     for(Class<? extends Annotation> annotation : annotations) {
       if(remote.isAnnotationPresent(annotation)) {
         try {
-          String path = root + "/" + this.extractMethodRequestPath(
+          String methodPath = this.extractMethodRequestPath(
             remote, 
             annotation
           );
+
+          String path = "/" + root;
+          if(!methodPath.isEmpty())
+            path += "/" + methodPath;
 
           HttpMethod httpMethod = annotation
             .getAnnotation(MethodMapping.class)
@@ -84,7 +95,8 @@ public class Reflection {
                 new LookupEntryParam(
                   null,
                   true, 
-                  param.getType()
+                  param.getType(),
+                  instance
                 )
               );
             } else if(param.isAnnotationPresent(PathParam.class)) {
@@ -94,7 +106,8 @@ public class Reflection {
                 new LookupEntryParam(
                   name,
                   false,
-                  param.getType()
+                  param.getType(),
+                  instance
                 )
               );
             };
@@ -106,6 +119,7 @@ public class Reflection {
               new LookupEntry(
                 key,
                 params,
+                instance,
                 remote
               )
             );
