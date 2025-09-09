@@ -8,6 +8,9 @@ import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
 import imd.ufrn.data.errors.Error;
+import imd.ufrn.interceptors.AfterInterceptor;
+import imd.ufrn.interceptors.BeforeInterceptor;
+import imd.ufrn.interceptors.InvocationContext;
 
 public class Invoker {
   @Getter
@@ -15,10 +18,12 @@ public class Invoker {
 
   @SuppressWarnings("unchecked")
   public Response<Object> invoke(
+    InvocationContext context,
     Reader reader,
     InvokerEntry entry
   ) throws Exception {
     Method method = entry.remote();
+
     Object[] params = entry
       .params()
       .stream()
@@ -41,11 +46,23 @@ public class Invoker {
         }
       }).toArray();
 
+    context.setParams(params);
+    
     try {
+      // TODO - Chamar interceptadores
+      
+      for(BeforeInterceptor before : entry.before()) {
+        
+      };
+
       Object result = method.invoke(
         entry.instance(),
         params
       );
+
+      for(AfterInterceptor after : entry.after()) {
+        
+      };
 
       if(result instanceof Response)
         return (Response<Object>) result;

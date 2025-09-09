@@ -42,6 +42,8 @@ public class Lookup {
           return null;
         
         return new InvokerEntry(
+          entry.before(),
+          entry.after(),
           params,
           entry.instance(),
           entry.remote()

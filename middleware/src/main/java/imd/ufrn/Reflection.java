@@ -9,6 +9,8 @@ import java.util.List;
 
 import imd.ufrn.annotations.DeleteMapping;
 import imd.ufrn.annotations.GetMapping;
+import imd.ufrn.annotations.InterceptAfter;
+import imd.ufrn.annotations.InterceptBefore;
 import imd.ufrn.annotations.MethodMapping;
 import imd.ufrn.annotations.PathParam;
 import imd.ufrn.annotations.PostMapping;
@@ -17,6 +19,8 @@ import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.errors.AnnotationNotPresent;
+import imd.ufrn.interceptors.AfterInterceptor;
+import imd.ufrn.interceptors.BeforeInterceptor;
 import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupEntry;
 import imd.ufrn.lookup.LookupEntryParam;
@@ -113,11 +117,29 @@ public class Reflection {
             };
           };
 
+          List<BeforeInterceptor> before = new LinkedList<BeforeInterceptor>();
+          if(remote.isAnnotationPresent(InterceptBefore.class)) {
+            InterceptBefore interceptBefore = remote.getAnnotation(InterceptBefore.class);
+            for(Class<BeforeInterceptor> interceptor : interceptBefore.value()) {
+              before.add(interceptor.getConstructor().newInstance());
+            };
+          };
+
+          List<AfterInterceptor> after = new LinkedList<AfterInterceptor>();
+          if(remote.isAnnotationPresent(InterceptAfter.class)) {
+            InterceptAfter interceptAfter = remote.getAnnotation(InterceptAfter.class);
+            for(Class<AfterInterceptor> interceptor : interceptAfter.value()) {
+              after.add(interceptor.getConstructor().newInstance());
+            };
+          };
+
           Lookup
             .getInstance()
             .register(
               new LookupEntry(
                 key,
+                before,
+                after,
                 params,
                 instance,
                 remote

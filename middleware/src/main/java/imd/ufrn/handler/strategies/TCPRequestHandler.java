@@ -16,6 +16,7 @@ import imd.ufrn.data.connection.TCPConnection;
 import imd.ufrn.data.errors.Error;
 import imd.ufrn.data.errors.NotFound;
 import imd.ufrn.enums.TransportProtocol;
+import imd.ufrn.interceptors.InvocationContext;
 import imd.ufrn.invoker.Invoker;
 import imd.ufrn.invoker.InvokerEntry;
 import imd.ufrn.lookup.Lookup;
@@ -67,18 +68,25 @@ public class TCPRequestHandler extends RequestHandler {
       try {
         do {
           try {
+            InvocationContext context = new InvocationContext();
+
             LookupKey key = Marshaller
               .getInstance()
               .identify(reader);
+
+            context.setKey(key);
           
             Optional<InvokerEntry> entry = Lookup
               .getInstance()
               .findInvokerEntry(key);
 
             if(entry.isPresent()) {
+              context.setInvoke(entry.get());
+
               Response<Object> response = Invoker
                 .getInstance()
                 .invoke(
+                  context,
                   reader,
                   entry.get()
                 );
