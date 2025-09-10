@@ -9,10 +9,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 
+import imd.ufrn.data.errors.Error;
 import imd.ufrn.Marshaller;
+import imd.ufrn.data.Response;
+import imd.ufrn.data.errors.NotFound;
 import imd.ufrn.data.packages.Packet;
 import imd.ufrn.data.packages.PacketReader;
 import imd.ufrn.enums.TransportProtocol;
+import imd.ufrn.interceptors.InvocationContext;
+import imd.ufrn.invoker.Invoker;
 import imd.ufrn.invoker.InvokerEntry;
 import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupKey;
@@ -67,18 +72,18 @@ public class UDPRequestHandler extends RequestHandler {
   };
 
   private void send(Packet packet) throws IOException {
-    DatagramPacket datagramPacket = new DatagramPacket(
+    DatagramPacket datagram = new DatagramPacket(
       new byte[1024], 
       1024,
       packet.address()
     );
 
-    datagramPacket.setData(
+    datagram.setData(
       packet.content()
         .getBytes(StandardCharsets.UTF_8)
     );
 
-    socket.send(datagramPacket);
+    socket.send(datagram);
   };
   
   @Override
@@ -88,36 +93,46 @@ public class UDPRequestHandler extends RequestHandler {
 
     return () -> {
       try {
+        InvocationContext context = new InvocationContext();
+
         LookupKey key = Marshaller
             .getInstance()
             .identify(reader);
+          
+        context.setKey(key);
           
         Optional<InvokerEntry> entry = Lookup
           .getInstance()
           .findInvokerEntry(key);
         
-        
-        // Content content = this.getApplication().read(
-        //   packet.content()
-        // );
+        if(entry.isPresent()) {
+          context.setInvoke(entry.get());
 
-        // if(content instanceof Error) {
-        //   this.send(new Packet(
-        //     packet.address(),
-        //     content.serialize()
-        //   ));
-        // } else {
-          // Optional<Content> response = this.getProcess().run(
-          //   content,
-          //   Optional.empty()
-          // );
-
-          // if(response.isPresent())
-          //   this.send(new Packet(
-          //     packet.address(),
-          //     response.get().serialize()
-          //   ));
-        // };
+          Response<Object> response = Invoker
+            .getInstance()
+            .invoke(
+              context,
+              reader,
+              entry.get()
+            );
+          
+          this.send(new Packet(
+            packet.address(),
+            response.serialize()
+          ));
+        } else {
+          this.send(new Packet(
+            packet.address(),
+            new NotFound().toResponse().serialize()
+          ));
+        };
+      }  catch (Error error) {
+        try {
+          this.send(new Packet(
+            packet.address(),
+            error.toResponse().serialize()
+          ));
+        } catch (Exception e) {};
       } catch (Exception e) {};
     };
   };

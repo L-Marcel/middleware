@@ -23,7 +23,7 @@ public class PacketReader implements Reader {
   @Override
   public String readNextLine() throws IOException, EOFException {
     if(content.trim().isEmpty()) throw new EOFException();
-    String[] parts = content.split("\r\n");
+    String[] parts = content.trim().split("\r\n");
     String line = parts[0];
 
     if(line.length() < content.length())
