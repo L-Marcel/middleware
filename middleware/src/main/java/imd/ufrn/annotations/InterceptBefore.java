@@ -5,10 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import imd.ufrn.interceptors.BeforeInterceptor;
+import imd.ufrn.interceptors.Interceptor;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InterceptBefore {
-  public Class<BeforeInterceptor>[] value();
+  public Class<? extends Interceptor>[] value();
 };

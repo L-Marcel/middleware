@@ -4,16 +4,22 @@ import java.util.List;
 
 import imd.ufrn.annotations.DeleteMapping;
 import imd.ufrn.annotations.GetMapping;
+import imd.ufrn.annotations.InterceptAfter;
+import imd.ufrn.annotations.InterceptBefore;
 import imd.ufrn.annotations.PathParam;
 import imd.ufrn.annotations.PostMapping;
 import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.data.Response;
 import imd.ufrn.dto.Amount;
+import imd.ufrn.interceptors.ControllerLogInterceptor;
+import imd.ufrn.interceptors.RemoteLogInterceptor;
+import imd.ufrn.interceptors.StatusLogInterceptor;
 import imd.ufrn.models.Product;
 import imd.ufrn.services.ProductsService;
 
 @RestController("products")
+@InterceptBefore({ControllerLogInterceptor.class})
 public class ProductsController {
   private final ProductsService service;
   public ProductsController() {
@@ -21,6 +27,7 @@ public class ProductsController {
   };
 
   @GetMapping
+  @InterceptAfter({StatusLogInterceptor.class})
   public Response<List<Product>> findAll() {
     List<Product> products = this.service.findAll();
     return Response.ok(products);
@@ -35,6 +42,7 @@ public class ProductsController {
   };
 
   @PostMapping
+  @InterceptAfter({StatusLogInterceptor.class})
   public Response<Void> register(
     @RequestBody Product product
   ) {
@@ -43,6 +51,7 @@ public class ProductsController {
   };
 
   @PostMapping("{id}/buy")
+  @InterceptBefore({RemoteLogInterceptor.class})
   public Response<Void> buyById(
     @PathParam("id") Integer id,
     @RequestBody Amount amount
@@ -52,6 +61,8 @@ public class ProductsController {
   };
 
   @PostMapping("{id}/sell")
+  @InterceptBefore({RemoteLogInterceptor.class})
+  @InterceptAfter({StatusLogInterceptor.class})
   public Response<Void> sellById(
     @PathParam("id") Integer id,
     @RequestBody Amount amount

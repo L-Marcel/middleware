@@ -11,4 +11,5 @@ public class InvocationContext {
   private LookupKey key;
   private InvokerEntry invoke;
   private Object[] params;
+  private Object result;
 };

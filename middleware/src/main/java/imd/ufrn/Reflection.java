@@ -19,8 +19,7 @@ import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
 import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.errors.AnnotationNotPresent;
-import imd.ufrn.interceptors.AfterInterceptor;
-import imd.ufrn.interceptors.BeforeInterceptor;
+import imd.ufrn.interceptors.Interceptor;
 import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupEntry;
 import imd.ufrn.lookup.LookupEntryParam;
@@ -63,9 +62,31 @@ public class Reflection {
         Constructor<?> constructor = controller.getConstructor();
         Object instance = constructor.newInstance();
 
-        System.out.println("Registering controler: " + annotation.value());
+        List<Interceptor> before = new LinkedList<Interceptor>();
+        if(controller.isAnnotationPresent(InterceptBefore.class)) {
+          InterceptBefore interceptBefore = controller.getAnnotation(InterceptBefore.class);
+          for(Class<? extends Interceptor> interceptor : interceptBefore.value()) {
+            before.add(interceptor.getConstructor().newInstance());
+          };
+        };
+
+        List<Interceptor> after = new LinkedList<Interceptor>();
+        if(controller.isAnnotationPresent(InterceptAfter.class)) {
+          InterceptAfter interceptAfter = controller.getAnnotation(InterceptAfter.class);
+          for(Class<? extends Interceptor> interceptor : interceptAfter.value()) {
+            after.add(interceptor.getConstructor().newInstance());
+          };
+        };
+
+        System.out.println("[Server] Registering controler: " + annotation.value());
         for(Method method : controller.getMethods()) {
-          this.mapRemotes(annotation.value(), method, instance);
+          this.mapRemotes(
+            annotation.value(), 
+            method, 
+            instance, 
+            new LinkedList<>(before),
+            new LinkedList<>(after)
+          );
         };
       };
     } catch (Exception e) {
@@ -73,7 +94,14 @@ public class Reflection {
     }
   };
 
-  public void mapRemotes(String root, Method remote, Object instance) {
+  public void mapRemotes(
+    String root, 
+    Method remote, 
+    Object instance,
+    List<Interceptor> before,
+    List<Interceptor> after
+
+  ) {
     for(Class<? extends Annotation> annotation : annotations) {
       if(remote.isAnnotationPresent(annotation)) {
         try {
@@ -117,18 +145,16 @@ public class Reflection {
             };
           };
 
-          List<BeforeInterceptor> before = new LinkedList<BeforeInterceptor>();
           if(remote.isAnnotationPresent(InterceptBefore.class)) {
             InterceptBefore interceptBefore = remote.getAnnotation(InterceptBefore.class);
-            for(Class<BeforeInterceptor> interceptor : interceptBefore.value()) {
+            for(Class<? extends Interceptor> interceptor : interceptBefore.value()) {
               before.add(interceptor.getConstructor().newInstance());
             };
           };
 
-          List<AfterInterceptor> after = new LinkedList<AfterInterceptor>();
           if(remote.isAnnotationPresent(InterceptAfter.class)) {
             InterceptAfter interceptAfter = remote.getAnnotation(InterceptAfter.class);
-            for(Class<AfterInterceptor> interceptor : interceptAfter.value()) {
+            for(Class<? extends Interceptor> interceptor : interceptAfter.value()) {
               after.add(interceptor.getConstructor().newInstance());
             };
           };

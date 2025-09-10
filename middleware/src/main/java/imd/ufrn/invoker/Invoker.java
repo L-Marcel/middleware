@@ -8,8 +8,7 @@ import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
 import imd.ufrn.data.errors.Error;
-import imd.ufrn.interceptors.AfterInterceptor;
-import imd.ufrn.interceptors.BeforeInterceptor;
+import imd.ufrn.interceptors.Interceptor;
 import imd.ufrn.interceptors.InvocationContext;
 
 public class Invoker {
@@ -49,10 +48,8 @@ public class Invoker {
     context.setParams(params);
     
     try {
-      // TODO - Chamar interceptadores
-      
-      for(BeforeInterceptor before : entry.before()) {
-        
+      for(Interceptor before : entry.before()) {
+        before.intercept(context);
       };
 
       Object result = method.invoke(
@@ -60,8 +57,10 @@ public class Invoker {
         params
       );
 
-      for(AfterInterceptor after : entry.after()) {
-        
+      context.setResult(result);
+
+      for(Interceptor after : entry.after()) {
+        after.intercept(context);
       };
 
       if(result instanceof Response)
