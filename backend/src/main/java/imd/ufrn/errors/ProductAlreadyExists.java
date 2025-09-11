@@ -7,7 +7,7 @@ public class ProductAlreadyExists extends Error {
   public ProductAlreadyExists() {
     super(
       StatusCode.CONFLICT, 
-      "Produto não encontrado!"
+      "Produto já existe!"
     );
   };
 };

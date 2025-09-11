@@ -23,14 +23,16 @@ public class PacketReader implements Reader {
   @Override
   public String readNextLine() throws IOException, EOFException {
     if(content.trim().isEmpty()) throw new EOFException();
-    String[] parts = content.trim().split("\r\n");
+    String[] parts = content.split("\n");
+    if(parts.length == 0) throw new EOFException();
     String line = parts[0];
 
-    if(line.length() < content.length())
+    if(parts.length > 1) line += "\n";
+    if(line.length() < content.length()) {
       content = content.substring(line.length(), content.length());
-    else content = "";
+    } else content = "";
 
-    return line;
+    return line.trim();
   };
 
   @Override

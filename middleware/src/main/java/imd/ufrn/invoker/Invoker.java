@@ -8,6 +8,7 @@ import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
 import imd.ufrn.data.errors.Error;
+import imd.ufrn.data.errors.InternalServerError;
 import imd.ufrn.interceptors.Interceptor;
 import imd.ufrn.interceptors.InvocationContext;
 
@@ -47,30 +48,39 @@ public class Invoker {
 
     context.setParams(params);
     
+    Object result = null;
+    
     try {
       for(Interceptor before : entry.before()) {
         before.intercept(context);
       };
 
-      Object result = method.invoke(
+      result = method.invoke(
         entry.instance(),
         params
       );
 
       context.setResult(result);
-
-      for(Interceptor after : entry.after()) {
-        after.intercept(context);
-      };
-
-      if(result instanceof Response)
-        return (Response<Object>) result;
     } catch (InvocationTargetException e) {
       if(e.getTargetException() instanceof Error) {
-        throw (Error) e.getTargetException();
+        Error error = (Error) e.getTargetException();
+        result = error.toResponse();
+        context.setResult(result);
+      } else {
+        result = new InternalServerError().toResponse();
       };
+    } catch (Exception e) {
+      result = new InternalServerError().toResponse();
     };
     
-    return null;
+    for(Interceptor after : entry.after()) {
+      after.intercept(context);
+    };
+    
+    if(result instanceof Response)
+      return (Response<Object>) result;
+    
+    result = new InternalServerError().toResponse();
+    return (Response<Object>) result;
   };
 };

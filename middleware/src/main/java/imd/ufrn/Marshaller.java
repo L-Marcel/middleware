@@ -43,12 +43,8 @@ public class Marshaller {
     while(!content.trim().isEmpty()) {
       String[] header = content.split(": ");
 
-      StringBuilder builder = new StringBuilder();
-      for(int i = 1; i < header.length; i++)
-        builder.append(header[i]);
-
-      if("Content-Length".equals(header[0]))
-        contentLength = Integer.parseInt(builder.toString());
+      if(header.length > 1 && "Content-Length".equals(header[0]))
+        contentLength = Integer.parseInt(header[1]);
       
       content = reader.readNextLine();
     };

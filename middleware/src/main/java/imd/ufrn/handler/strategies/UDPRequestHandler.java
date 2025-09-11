@@ -126,13 +126,6 @@ public class UDPRequestHandler extends RequestHandler {
             new NotFound().toResponse().serialize()
           ));
         };
-      }  catch (Error error) {
-        try {
-          this.send(new Packet(
-            packet.address(),
-            error.toResponse().serialize()
-          ));
-        } catch (Exception e) {};
       } catch (Exception e) {};
     };
   };

@@ -13,7 +13,6 @@ import imd.ufrn.data.Reader;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.connection.Connection;
 import imd.ufrn.data.connection.TCPConnection;
-import imd.ufrn.data.errors.Error;
 import imd.ufrn.data.errors.NotFound;
 import imd.ufrn.enums.TransportProtocol;
 import imd.ufrn.interceptors.InvocationContext;
@@ -99,10 +98,6 @@ public class TCPRequestHandler extends RequestHandler {
                 new NotFound().toResponse().serialize()
               );
             };
-          } catch (Error error) {
-            connection.getWriter().send(
-              error.toResponse().serialize()
-            );
           } catch (Exception e) {
             if(!connection.isClosed())
               connection.close();
