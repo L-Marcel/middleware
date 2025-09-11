@@ -7,7 +7,7 @@ import imd.ufrn.Marshaller;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
-import imd.ufrn.data.errors.Error;
+import imd.ufrn.data.errors.RemotingError;
 import imd.ufrn.data.errors.InternalServerError;
 import imd.ufrn.interceptors.Interceptor;
 import imd.ufrn.interceptors.InvocationContext;
@@ -17,7 +17,7 @@ public class Invoker {
   private static final Invoker instance = new Invoker();
 
   @SuppressWarnings("unchecked")
-  public Response<Object> invoke(
+  public Response<? extends Object> invoke(
     InvocationContext context,
     Reader reader,
     InvokerEntry entry
@@ -48,39 +48,36 @@ public class Invoker {
 
     context.setParams(params);
     
-    Object result = null;
-    
     try {
       for(Interceptor before : entry.before()) {
         before.intercept(context);
       };
 
-      result = method.invoke(
+      Object object = method.invoke(
         entry.instance(),
         params
       );
 
-      context.setResult(result);
+      if(object instanceof Response)
+        context.setResult((Response<Object>) object);
     } catch (InvocationTargetException e) {
-      if(e.getTargetException() instanceof Error) {
-        Error error = (Error) e.getTargetException();
-        result = error.toResponse();
-        context.setResult(result);
-      } else {
-        result = new InternalServerError().toResponse();
+      if(e.getTargetException() instanceof RemotingError) {
+        RemotingError error = (RemotingError) e.getTargetException();
+        context.setResult(error.toResponse());
       };
-    } catch (Exception e) {
-      result = new InternalServerError().toResponse();
-    };
+    } catch (RemotingError e) {
+      context.setResult(e.toResponse());
+    } catch (Exception e) {};
     
+    if(context.getResult() == null) {
+      RemotingError error = new InternalServerError();
+      context.setResult(error.toResponse());
+    };
+
     for(Interceptor after : entry.after()) {
       after.intercept(context);
     };
     
-    if(result instanceof Response)
-      return (Response<Object>) result;
-    
-    result = new InternalServerError().toResponse();
-    return (Response<Object>) result;
+    return context.getResult();
   };
 };

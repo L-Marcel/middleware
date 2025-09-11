@@ -1,5 +1,6 @@
 package imd.ufrn.interceptors;
 
+import imd.ufrn.data.Response;
 import imd.ufrn.invoker.InvokerEntry;
 import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
@@ -11,5 +12,5 @@ public class InvocationContext {
   private LookupKey key;
   private InvokerEntry invoke;
   private Object[] params;
-  private Object result;
+  private Response<? extends Object> result;
 };

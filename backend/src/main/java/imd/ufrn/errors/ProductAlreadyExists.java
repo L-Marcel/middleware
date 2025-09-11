@@ -1,9 +1,9 @@
 package imd.ufrn.errors;
 
 import imd.ufrn.data.StatusCode;
-import imd.ufrn.data.errors.Error;
+import imd.ufrn.data.errors.RemotingError;
 
-public class ProductAlreadyExists extends Error {
+public class ProductAlreadyExists extends RemotingError {
   public ProductAlreadyExists() {
     super(
       StatusCode.CONFLICT, 

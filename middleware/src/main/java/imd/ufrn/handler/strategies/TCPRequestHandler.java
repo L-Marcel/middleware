@@ -82,7 +82,7 @@ public class TCPRequestHandler extends RequestHandler {
             if(entry.isPresent()) {
               context.setInvoke(entry.get());
 
-              Response<Object> response = Invoker
+              Response<? extends Object> response = Invoker
                 .getInstance()
                 .invoke(
                   context,

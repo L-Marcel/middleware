@@ -2,7 +2,7 @@ package imd.ufrn.data.errors;
 
 import imd.ufrn.data.StatusCode;
 
-public class BadRequest extends Error {
+public class BadRequest extends RemotingError {
   public BadRequest() {
     super(
       StatusCode.BAD_REQUEST, 

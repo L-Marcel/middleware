@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 
-import imd.ufrn.data.errors.Error;
 import imd.ufrn.Marshaller;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.errors.NotFound;
@@ -108,7 +107,7 @@ public class UDPRequestHandler extends RequestHandler {
         if(entry.isPresent()) {
           context.setInvoke(entry.get());
 
-          Response<Object> response = Invoker
+          Response<? extends Object> response = Invoker
             .getInstance()
             .invoke(
               context,

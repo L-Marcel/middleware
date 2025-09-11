@@ -6,10 +6,10 @@ import imd.ufrn.errors.ErrorPayload;
 import lombok.Getter;
 
 @Getter
-public class Error extends RuntimeException {
+public class RemotingError extends RuntimeException {
   private StatusCode code;
 
-  public Error(StatusCode code, String message) {
+  public RemotingError(StatusCode code, String message) {
     super(message);
     this.code = code;
   };
