@@ -4,13 +4,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import imd.ufrn.Marshaller;
+import imd.ufrn.beans.ContextInterceptor;
+import imd.ufrn.beans.Controller;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
 import imd.ufrn.data.errors.RemotingError;
 import imd.ufrn.data.errors.InternalServerError;
-import imd.ufrn.interceptors.Interceptor;
 import imd.ufrn.interceptors.InvocationContext;
+import imd.ufrn.lifecycle.Bean;
+import imd.ufrn.lifecycle.Beans;
+import imd.ufrn.lifecycle.LifecycleManager;
 
 public class Invoker {
   @Getter
@@ -48,13 +52,33 @@ public class Invoker {
 
     context.setParams(params);
     
+    Bean bean = null;
     try {
-      for(Interceptor before : entry.before()) {
-        before.intercept(context);
-      };
+      bean =  Beans
+        .getInstance()
+        .get(entry.controller());
 
+      bean = LifecycleManager
+        .getInstance()
+        .activate(bean);
+
+      for(String before : entry.before()) {
+        ContextInterceptor interceptor = (ContextInterceptor) Beans
+          .getInstance()
+          .get(before);
+
+        interceptor = (ContextInterceptor) LifecycleManager
+          .getInstance()
+          .activate(interceptor);
+
+        interceptor
+          .getInterceptor()
+          .intercept(context);
+      };
+      
+      Object controller = (Object) bean.getInstance();
       Object object = method.invoke(
-        entry.instance(),
+        controller,
         params
       );
 
@@ -67,15 +91,31 @@ public class Invoker {
       };
     } catch (RemotingError e) {
       context.setResult(e.toResponse());
-    } catch (Exception e) {};
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      LifecycleManager
+        .getInstance()
+        .destroy(bean);
+    };
     
     if(context.getResult() == null) {
       RemotingError error = new InternalServerError();
       context.setResult(error.toResponse());
     };
 
-    for(Interceptor after : entry.after()) {
-      after.intercept(context);
+    for(String after : entry.after()) {
+      ContextInterceptor interceptor = (ContextInterceptor) Beans
+        .getInstance()
+        .get(after);
+
+      interceptor = (ContextInterceptor) LifecycleManager
+        .getInstance()
+        .activate(interceptor);
+
+      interceptor
+        .getInterceptor()
+        .intercept(context);
     };
     
     return context.getResult();

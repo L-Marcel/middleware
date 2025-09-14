@@ -17,6 +17,8 @@ import imd.ufrn.annotations.PostMapping;
 import imd.ufrn.annotations.PutMapping;
 import imd.ufrn.annotations.RequestBody;
 import imd.ufrn.annotations.RestController;
+import imd.ufrn.beans.ContextInterceptor;
+import imd.ufrn.beans.Controller;
 import imd.ufrn.enums.HttpMethod;
 import imd.ufrn.errors.AnnotationNotPresent;
 import imd.ufrn.interceptors.Interceptor;
@@ -24,6 +26,8 @@ import imd.ufrn.lookup.Lookup;
 import imd.ufrn.lookup.LookupEntry;
 import imd.ufrn.lookup.LookupEntryParam;
 import imd.ufrn.lookup.LookupKey;
+import imd.ufrn.lifecycle.Bean;
+import imd.ufrn.lifecycle.Beans;
 import lombok.Getter;
 
 public class Reflection {
@@ -59,22 +63,27 @@ public class Reflection {
       for(Class<?> controller : this.controllers) {
         RestController annotation = controller
           .getAnnotation(RestController.class);
-        Constructor<?> constructor = controller.getConstructor();
-        Object instance = constructor.newInstance();
 
-        List<Interceptor> before = new LinkedList<Interceptor>();
+        Bean bean = new Controller(controller);
+        Beans.getInstance().register(bean);
+
+        List<String> before = new LinkedList<String>();
         if(controller.isAnnotationPresent(InterceptBefore.class)) {
           InterceptBefore interceptBefore = controller.getAnnotation(InterceptBefore.class);
           for(Class<? extends Interceptor> interceptor : interceptBefore.value()) {
-            before.add(interceptor.getConstructor().newInstance());
+            before.add(interceptor.getName());
+            ContextInterceptor contextInterceptor = new ContextInterceptor(interceptor);
+            Beans.getInstance().register(contextInterceptor);
           };
         };
 
-        List<Interceptor> after = new LinkedList<Interceptor>();
+        List<String> after = new LinkedList<String>();
         if(controller.isAnnotationPresent(InterceptAfter.class)) {
           InterceptAfter interceptAfter = controller.getAnnotation(InterceptAfter.class);
           for(Class<? extends Interceptor> interceptor : interceptAfter.value()) {
-            after.add(interceptor.getConstructor().newInstance());
+            after.add(interceptor.getName());
+            ContextInterceptor contextInterceptor = new ContextInterceptor(interceptor);
+            Beans.getInstance().register(contextInterceptor);
           };
         };
 
@@ -82,10 +91,10 @@ public class Reflection {
         for(Method method : controller.getMethods()) {
           this.mapRemotes(
             annotation.value(), 
-            method, 
-            instance, 
+            method,
             new LinkedList<>(before),
-            new LinkedList<>(after)
+            new LinkedList<>(after),
+            controller
           );
         };
       };
@@ -97,10 +106,9 @@ public class Reflection {
   public void mapRemotes(
     String root, 
     Method remote, 
-    Object instance,
-    List<Interceptor> before,
-    List<Interceptor> after
-
+    List<String> before,
+    List<String> after,
+    Class<?> controller
   ) {
     for(Class<? extends Annotation> annotation : annotations) {
       if(remote.isAnnotationPresent(annotation)) {
@@ -148,14 +156,18 @@ public class Reflection {
           if(remote.isAnnotationPresent(InterceptBefore.class)) {
             InterceptBefore interceptBefore = remote.getAnnotation(InterceptBefore.class);
             for(Class<? extends Interceptor> interceptor : interceptBefore.value()) {
-              before.add(interceptor.getConstructor().newInstance());
+              before.add(interceptor.getName());
+              ContextInterceptor contextInterceptor = new ContextInterceptor(interceptor);
+              Beans.getInstance().register(contextInterceptor);
             };
           };
 
           if(remote.isAnnotationPresent(InterceptAfter.class)) {
             InterceptAfter interceptAfter = remote.getAnnotation(InterceptAfter.class);
             for(Class<? extends Interceptor> interceptor : interceptAfter.value()) {
-              after.add(interceptor.getConstructor().newInstance());
+              after.add(interceptor.getName());
+              ContextInterceptor contextInterceptor = new ContextInterceptor(interceptor);
+              Beans.getInstance().register(contextInterceptor);
             };
           };
 
@@ -167,7 +179,7 @@ public class Reflection {
                 before,
                 after,
                 params,
-                instance,
+                controller.getName(),
                 remote
               )
             );

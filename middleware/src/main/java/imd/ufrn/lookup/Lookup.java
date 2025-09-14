@@ -45,7 +45,7 @@ public class Lookup {
           entry.before(),
           entry.after(),
           params,
-          entry.instance(),
+          entry.controller(),
           entry.remote()
         );
       }).filter((_class) -> _class != null)
