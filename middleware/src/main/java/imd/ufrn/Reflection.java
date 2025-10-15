@@ -94,7 +94,7 @@ public class Reflection {
             method,
             new LinkedList<>(before),
             new LinkedList<>(after),
-            controller
+            controller.getName()
           );
         };
       };
@@ -108,7 +108,7 @@ public class Reflection {
     Method remote, 
     List<String> before,
     List<String> after,
-    Class<?> controller
+    String controller
   ) {
     for(Class<? extends Annotation> annotation : annotations) {
       if(remote.isAnnotationPresent(annotation)) {
@@ -179,7 +179,7 @@ public class Reflection {
                 before,
                 after,
                 params,
-                controller.getName(),
+                controller,
                 remote
               )
             );

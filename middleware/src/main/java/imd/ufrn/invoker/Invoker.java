@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 
 import imd.ufrn.Marshaller;
 import imd.ufrn.beans.ContextInterceptor;
-import imd.ufrn.beans.Controller;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;

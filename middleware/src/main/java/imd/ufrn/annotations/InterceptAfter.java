@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 import imd.ufrn.interceptors.Interceptor;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InterceptAfter {
   public Class<? extends Interceptor>[] value();

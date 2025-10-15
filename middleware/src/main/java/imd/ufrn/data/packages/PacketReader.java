@@ -37,7 +37,6 @@ public class PacketReader implements Reader {
 
   @Override
   public byte[] readBytes(int length) throws IOException, EOFException {
-    // TODO - Verificar depois se tem erro
     byte[] bytes = content.getBytes();
     try (ByteArrayBuilder builder = ByteArrayBuilder.fromInitial(bytes, length)) {
       return builder.toByteArray();
