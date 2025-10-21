@@ -23,7 +23,7 @@ import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 @Getter
-public class UDPRequestHandler extends RequestHandler {
+public class UDPRequestHandler implements RequestHandler {
   private DatagramSocket socket;
 
   @Override

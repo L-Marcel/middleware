@@ -23,7 +23,7 @@ import imd.ufrn.lookup.LookupKey;
 import lombok.Getter;
 
 @Getter
-public class TCPRequestHandler extends RequestHandler {
+public class TCPRequestHandler implements RequestHandler {
   private ServerSocket socket;
   private Duration timeout;
 

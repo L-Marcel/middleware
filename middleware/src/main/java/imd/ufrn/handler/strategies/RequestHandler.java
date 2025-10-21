@@ -7,16 +7,16 @@ import java.time.Duration;
 
 import imd.ufrn.enums.TransportProtocol;
 
-public abstract class RequestHandler {  
-  public abstract TransportProtocol getTransportProtocol();
-  public abstract InetSocketAddress getAddress();
+public interface RequestHandler {  
+  public TransportProtocol getTransportProtocol();
+  public InetSocketAddress getAddress();
     
-  public abstract void bind(
+  public void bind(
     int port,
     int backlog,
     Duration timeout
   ) throws BindException, IOException;
   
-  public abstract Runnable accept() 
+  public Runnable accept() 
     throws IOException;
 };
