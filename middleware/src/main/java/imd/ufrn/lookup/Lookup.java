@@ -58,7 +58,7 @@ public class Lookup {
     String expected
   ) {
     Map<String, String> values = new LinkedHashMap<>();
-
+    
     String[] paths = path.split("/");
     String[] expecteds = expected.split("/");
 
@@ -82,8 +82,8 @@ public class Lookup {
       .map((entry) -> new InvokerEntryParam(
         entry.id(),
         entry.body(),
+        entry.required(),
         entry.type(),
-        entry.instance(),
         values.getOrDefault(entry.id(), null)
       )).toList();
   };

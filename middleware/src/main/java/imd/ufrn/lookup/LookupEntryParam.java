@@ -3,6 +3,6 @@ package imd.ufrn.lookup;
 public record LookupEntryParam(
   String id,
   boolean body,
-  Class<?> type,
-  Object instance
+  boolean required,
+  Class<?> type
 ) {};

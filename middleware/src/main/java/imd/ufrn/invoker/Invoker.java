@@ -9,6 +9,7 @@ import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
 import imd.ufrn.data.errors.RemoteError;
+import imd.ufrn.data.errors.BadRequest;
 import imd.ufrn.data.errors.InternalServerError;
 import imd.ufrn.interceptors.InvocationContext;
 import imd.ufrn.lifecycle.Bean;
@@ -26,34 +27,37 @@ public class Invoker {
     InvokerEntry entry
   ) throws Exception {
     Method method = entry.remote();
+    Bean bean = null;
 
-    Object[] params = entry
-      .params()
-      .stream()
-      .map((param) -> {
-        try {
-          if(param.body()) {
+    try {
+      Object[] params = entry
+        .params()
+        .stream()
+        .map((param) -> {
+          try {
+            if(param.body()) {
+              return Marshaller
+                .getInstance()
+                .mount(reader, param.type());
+            };
+
             return Marshaller
               .getInstance()
-              .mount(reader, param.type());
-          };
+              .deserialize(
+                param.value(), 
+                param.type()
+              );
+          } catch (Exception e) {
+            if(param.required()) 
+              throw new BadRequest();
+            
+            return null;
+          }
+        }).toArray();
 
-          return Marshaller
-            .getInstance()
-            .deserialize(
-              param.value(), 
-              param.type()
-            );
-        } catch (Exception e) {
-          return null;
-        }
-      }).toArray();
+      context.setParams(params);
 
-    context.setParams(params);
-    
-    Bean bean = null;
-    try {
-      bean =  Beans
+      bean = Beans
         .getInstance()
         .get(entry.controller());
 

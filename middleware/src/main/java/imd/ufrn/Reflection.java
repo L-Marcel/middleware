@@ -1,7 +1,6 @@
 package imd.ufrn;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedList;
@@ -33,6 +32,7 @@ import lombok.Getter;
 public class Reflection {
   @Getter
   private static final Reflection instance = new Reflection();
+
   private static final List<Class<? extends Annotation>> annotations = List.of(
     GetMapping.class,
     PostMapping.class,
@@ -134,20 +134,20 @@ public class Reflection {
               params.add(
                 new LookupEntryParam(
                   null,
-                  true, 
-                  param.getType(),
-                  instance
+                  true,
+                  true,
+                  param.getType()
                 )
               );
             } else if(param.isAnnotationPresent(PathParam.class)) {
-              String name = param.getAnnotation(PathParam.class).value();
+              PathParam pathParam = param.getAnnotation(PathParam.class);
 
               params.add(
                 new LookupEntryParam(
-                  name,
+                  pathParam.value(),
                   false,
-                  param.getType(),
-                  instance
+                  pathParam.required(),
+                  param.getType()
                 )
               );
             };
