@@ -2,7 +2,7 @@ package imd.ufrn.data;
 
 import java.nio.charset.StandardCharsets;
 
-import imd.ufrn.data.errors.RemotingError;
+import imd.ufrn.data.errors.RemoteError;
 import imd.ufrn.errors.ErrorPayload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +33,7 @@ public class Response<T extends Object> {
     return new Response<>(StatusCode.CREATED, null);
   };
 
-  public static Response<ErrorPayload> error(RemotingError error) {
+  public static Response<ErrorPayload> error(RemoteError error) {
     return new Response<>(
       error.getCode(), 
       new ErrorPayload(

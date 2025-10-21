@@ -8,7 +8,7 @@ import imd.ufrn.beans.ContextInterceptor;
 import imd.ufrn.data.Response;
 import imd.ufrn.data.Reader;
 import lombok.Getter;
-import imd.ufrn.data.errors.RemotingError;
+import imd.ufrn.data.errors.RemoteError;
 import imd.ufrn.data.errors.InternalServerError;
 import imd.ufrn.interceptors.InvocationContext;
 import imd.ufrn.lifecycle.Bean;
@@ -84,11 +84,11 @@ public class Invoker {
       if(object instanceof Response)
         context.setResult((Response<Object>) object);
     } catch (InvocationTargetException e) {
-      if(e.getTargetException() instanceof RemotingError) {
-        RemotingError error = (RemotingError) e.getTargetException();
+      if(e.getTargetException() instanceof RemoteError) {
+        RemoteError error = (RemoteError) e.getTargetException();
         context.setResult(error.toResponse());
       };
-    } catch (RemotingError e) {
+    } catch (RemoteError e) {
       context.setResult(e.toResponse());
     } catch (Exception e) {
       e.printStackTrace();
@@ -99,7 +99,7 @@ public class Invoker {
     };
     
     if(context.getResult() == null) {
-      RemotingError error = new InternalServerError();
+      RemoteError error = new InternalServerError();
       context.setResult(error.toResponse());
     };
 

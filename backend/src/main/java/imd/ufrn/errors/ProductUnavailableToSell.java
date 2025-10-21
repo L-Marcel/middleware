@@ -1,9 +1,9 @@
 package imd.ufrn.errors;
 
 import imd.ufrn.data.StatusCode;
-import imd.ufrn.data.errors.RemotingError;
+import imd.ufrn.data.errors.RemoteError;
 
-public class ProductUnavailableToSell extends RemotingError {
+public class ProductUnavailableToSell extends RemoteError {
   public ProductUnavailableToSell() {
     super(
       StatusCode.BAD_REQUEST, 
