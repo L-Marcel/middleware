@@ -1,71 +1,63 @@
 package imd.ufrn.lifecycle.strategies;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import imd.ufrn.lifecycle.Bean;
 import imd.ufrn.lifecycle.LifecycleStrategy;
 
 public class PerRequestLifecycle implements LifecycleStrategy {
-  public static final Map<String, List<Bean>> poll = new ConcurrentHashMap<>();
+  public static final Map<String, ConcurrentLinkedQueue<Bean>> poll = new ConcurrentHashMap<>();
 
   @Override
   public Bean activate(Bean bean) throws Exception {
-    List<Bean> poll = PerRequestLifecycle.poll.computeIfAbsent(
+    Queue<Bean> queue = PerRequestLifecycle.poll.computeIfAbsent(
       bean.getName(),
-      (key) -> Collections.synchronizedList(new LinkedList<>())
+      (key) -> new ConcurrentLinkedQueue<>()
     );
 
-    synchronized(poll) {
-      for(Bean cached : poll) {
-        synchronized(cached) {
-          if(!cached.isActivated()) {
-            cached.setActivated(true);
-            return cached;
+    if(queue.isEmpty()) {
+      synchronized(queue) {
+        if(queue.isEmpty()) {
+          for(int i = 0; i < 10; i++) {
+            Bean cloned = bean.clone();
+            cloned.activate();
+            cloned.setActivated(false);
+            queue.add(cloned);
           };
         };
       };
+    };
 
-      if(poll.isEmpty()) {
-        for(int i = 0; i < 10; i++) {
-          Bean cloned = bean.clone();
-          cloned.activate();
-          cloned.setActivated(false);
-          poll.add(cloned);
-        };
+    Bean cached = queue.poll();
 
-        Bean first = poll.getFirst();
-        first.setActivated(true);
-        return first;
-      } else {
-        Bean cloned = bean.clone();
-        cloned.activate();
-        poll.add(cloned);
-        return cloned;
-      }
+    if(cached != null) {
+      cached.setActivated(true);
+      return cached;
+    } else {
+      Bean cloned = bean.clone();
+      cloned.activate();
+      queue.add(cloned);
+      return cloned;
     }
   };
 
   @Override
   public void destroy(Bean bean) throws Exception {
     if(bean != null) {
-      List<Bean> poll = PerRequestLifecycle.poll.getOrDefault(
-        bean.getName(),
-        Collections.synchronizedList(new LinkedList<>())
+      Queue<Bean> queue = PerRequestLifecycle.poll.get(
+        bean.getName()
       );
 
-      synchronized(poll) {
-        if(poll.size() >= 10) {
-          poll.remove(bean);
-        } else {
-          synchronized(bean) {
-            bean.setActivated(false);
-          };
-        };
+      if(queue == null || queue.size() >= 10) {
+        bean.setActivated(false);
+        return;
       };
+
+      bean.setActivated(false);
+      queue.add(bean);
     };
   };
 };
