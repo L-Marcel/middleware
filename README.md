@@ -1,6 +1,6 @@
 # Dawn Middleware
 
-Esse repositório faz parte do segundo trabalho da disciplina de `programação concorrente`, ofertada na `UFRN/IMD`.
+Esse repositório faz parte do segundo trabalho da disciplina de `programação distribuída`, ofertada na `UFRN/IMD`.
 
 # Especificações
 
